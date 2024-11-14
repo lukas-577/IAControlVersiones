@@ -1,0 +1,7 @@
+fasterrcnn_planta.pth
+/data_set
+/uploads
+/__pycache__
+
+entrenamiento.py
+pasoDatosAFormatoCOCO.py
