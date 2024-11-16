@@ -38,7 +38,7 @@ async def upload_image(file: UploadFile = File(...)):
 
     # Crear nombre descriptivo para la imagen con las cajas detectadas
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_filename = f"{timestamp}_{file.filename}.jpg"
+    output_filename = f"{timestamp}_{file.filename}"
 
     # Guardar la imagen con las cajas detectadas en la carpeta
     output_path = f"{UPLOAD_DIR}/{output_filename}"
