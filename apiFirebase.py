@@ -27,6 +27,11 @@ firebase_admin.initialize_app(cred, {
 bucket = storage.bucket()
 
 
+@app.get("/")
+def read_root():
+    return {"message": "Todo ok"}
+
+
 @app.post("/upload-image/{user_uid}")
 # Asegúrate de recibir el UID del usuario
 async def upload_image(user_uid: str, file: UploadFile = File(...)):

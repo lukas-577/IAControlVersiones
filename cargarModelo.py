@@ -16,7 +16,8 @@ in_features = model.roi_heads.box_predictor.cls_score.in_features
 model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
 # Cargar los pesos entrenados
-model.load_state_dict(torch.load('fasterrcnn_planta_v2.pth'))
+model.load_state_dict(torch.load(
+    'fasterrcnn_planta_v2.pth', map_location=torch.device('cpu')))
 model.eval()  # Poner el modelo en modo de evaluación
 
 
