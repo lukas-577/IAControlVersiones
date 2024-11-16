@@ -3,7 +3,6 @@ from firebase_admin import credentials, storage
 import datetime
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from fastapi.responses import FileResponse
 from cargarModelo import preprocess_image, predict, plot_image_with_boxes
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
@@ -80,4 +79,19 @@ async def get_image(user_uid: str, image_name: str):
         image_url = blob.public_url
         return JSONResponse(content={"image_url": image_url})
     # Si la imagen no existe, devuelve un JSON con el error
+    return JSONResponse(status_code=404, content={"message": "Image not found"})
+
+
+@app.delete("/delete-image/{user_uid}/{image_name}")
+async def delete_image(user_uid: str, image_name: str):
+    # Crear la referencia a la imagen en Firebase Storage
+    blob = bucket.blob(f"users/{user_uid}/images/{image_name}")
+
+    # Verificar si el archivo existe en el bucket
+    if blob.exists():
+        # Eliminar el archivo del bucket
+        blob.delete()
+        return JSONResponse(content={"message": "Image deleted successfully"})
+
+    # Si el archivo no existe, devolver un error 404
     return JSONResponse(status_code=404, content={"message": "Image not found"})

@@ -3,7 +3,7 @@ import datetime
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
-from cargarModelo import preprocess_image, predict, plot_image_with_boxes
+from app.cargarModelo import preprocess_image, predict, plot_image_with_boxes
 from fastapi.middleware.cors import CORSMiddleware
 import tempfile
 import os

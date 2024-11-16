@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+firebase-admin
+torch
+torchvision
+Pillow
+matplotlib
