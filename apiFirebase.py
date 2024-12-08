@@ -9,9 +9,33 @@ from io import BytesIO
 import os
 import uvicorn
 
+
+# Descripción general de la API
+description = """
+### API de Gestión de Imágenes
+
+Esta API permite a los usuarios realizar las siguientes acciones:
+
+1. **Subir imágenes**: Puedes cargar imágenes, procesarlas y almacenarlas en Firebase Storage.
+2. **Obtener imágenes**: Consulta las URL públicas de las imágenes subidas.
+3. **Eliminar imágenes**: Borra imágenes específicas del almacenamiento.
+
+#### Cómo usar la API
+1. Usa el endpoint `POST /upload-image/{user_uid}` para subir imágenes. Asegúrate de proporcionar el `user_uid` y el archivo.
+2. Usa `GET /get-image/{user_uid}/{image_name}` para recuperar la URL pública de una imagen.
+3. Usa `DELETE /delete-image/{user_uid}/{image_name}` para eliminar una imagen específica.
+
+#### Notas importantes
+- Asegúrate de que el `user_uid` sea válido.
+- Los archivos deben ser de tipo imagen.
+- Consulta la documentación de cada endpoint para más detalles.
+
+"""
+
+
 app = FastAPI(
     title="API de Gestión de Imágenes IA con Firebase Storage",
-    description="Endpoints para subir, obtener y eliminar imágenes en Firebase Storage.",
+    description=description,
     version="1.0.0",
     contact={
         "name": "API IA con Firebase Storage",
