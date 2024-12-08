@@ -6,8 +6,22 @@ from fastapi.responses import JSONResponse
 from cargarModelo import preprocess_image, predict, plot_image_with_boxes
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
+import os
+import uvicorn
 
-app = FastAPI()
+app = FastAPI(
+    title="API de Gestión de Imágenes IA con Firebase Storage",
+    description="Endpoints para subir, obtener y eliminar imágenes en Firebase Storage.",
+    version="1.0.0",
+    contact={
+        "name": "API IA con Firebase Storage",
+        "email": "lmedinar@utem.cl",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+)
 
 # Habilitar CORS para todos los orígenes
 app.add_middleware(
@@ -27,14 +41,26 @@ firebase_admin.initialize_app(cred, {
 bucket = storage.bucket()
 
 
-@app.get("/")
+@app.get("/", tags=["General"])
 def read_root():
+    """Verifica que el servicio esté operativo."""
     return {"message": "Todo ok"}
 
 
-@app.post("/upload-image/{user_uid}")
+@app.post(
+    "/upload-image/{user_uid}",
+    tags=["Gestión de Imágenes"],
+    summary="Subir imagen",
+    description="Sube una imagen, procesa la misma y la guarda en Firebase Storage. Genera una URL pública para la imagen procesada.",
+)
 # Asegúrate de recibir el UID del usuario
 async def upload_image(user_uid: str, file: UploadFile = File(...)):
+    """Sube una imagen, procesa y la guarda en Firebase Storage.
+
+    - **user_uid**: ID del usuario.
+    - **file**: Imagen a subir.
+    """
+
     # Leer la imagen cargada en memoria
     file_content = await file.read()
 
@@ -74,8 +100,18 @@ async def upload_image(user_uid: str, file: UploadFile = File(...)):
     })
 
 
-@app.get("/get-image/{user_uid}/{image_name}")
+@app.get(
+    "/get-image/{user_uid}/{image_name}",
+    tags=["Gestión de Imágenes"],
+    summary="Obtener imagen",
+    description="Obtiene la URL pública de una imagen almacenada en Firebase Storage.",
+)
 async def get_image(user_uid: str, image_name: str):
+    """Obtiene una imagen almacenada.
+
+    - **user_uid**: ID del usuario.
+    - **image_name**: Nombre del archivo.
+    """
     # Buscar la imagen en Firebase Storage con el UID del usuario
     blob = bucket.blob(f"users/{user_uid}/images/{image_name}")
 
@@ -87,8 +123,19 @@ async def get_image(user_uid: str, image_name: str):
     return JSONResponse(status_code=404, content={"message": "Image not found"})
 
 
-@app.delete("/delete-image/{user_uid}/{image_name}")
+@app.delete(
+    "/delete-image/{user_uid}/{image_name}",
+    tags=["Gestión de Imágenes"],
+    summary="Eliminar imagen",
+    description="Elimina una imagen específica almacenada en Firebase Storage.",
+)
 async def delete_image(user_uid: str, image_name: str):
+    """Elimina una imagen específica.
+
+    - **user_uid**: ID del usuario.
+    - **image_name**: Nombre del archivo.
+    """
+
     # Crear la referencia a la imagen en Firebase Storage
     blob = bucket.blob(f"users/{user_uid}/images/{image_name}")
 
@@ -100,3 +147,10 @@ async def delete_image(user_uid: str, image_name: str):
 
     # Si el archivo no existe, devolver un error 404
     return JSONResponse(status_code=404, content={"message": "Image not found"})
+
+# Asegúrate de que el servidor se inicie correctamente
+if __name__ == "__main__":
+    # Obtiene el puerto desde la variable de entorno
+    port = int(os.environ.get("PORT", 8080))
+    print(f"Servidor iniciado en el puerto {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)
