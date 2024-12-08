@@ -1,3 +1,4 @@
+from typing import List
 import firebase_admin
 from firebase_admin import credentials, storage
 import datetime
@@ -18,12 +19,14 @@ Esta API permite a los usuarios realizar las siguientes acciones:
 
 1. **Subir imágenes**: Puedes cargar imágenes, procesarlas y almacenarlas en Firebase Storage.
 2. **Obtener imágenes**: Consulta las URL públicas de las imágenes subidas.
-3. **Eliminar imágenes**: Borra imágenes específicas del almacenamiento.
+3. **Obtener todas las imágenes**: Obtiene las URL públicas de todas las imágenes subidas por un usuario.
+4. **Eliminar imágenes**: Borra imágenes específicas del almacenamiento.
 
 #### Cómo usar la API
 1. Usa el endpoint `POST /upload-image/{user_uid}` para subir imágenes. Asegúrate de proporcionar el `user_uid` y el archivo.
 2. Usa `GET /get-image/{user_uid}/{image_name}` para recuperar la URL pública de una imagen.
-3. Usa `DELETE /delete-image/{user_uid}/{image_name}` para eliminar una imagen específica.
+3. Usa `GET /get-images/{user_uid}` para obtener todas las imágenes de un usuario.
+4. Usa `DELETE /delete-image/{user_uid}/{image_name}` para eliminar una imagen específica.
 
 #### Notas importantes
 - Asegúrate de que el `user_uid` sea válido.
@@ -145,6 +148,33 @@ async def get_image(user_uid: str, image_name: str):
         return JSONResponse(content={"image_url": image_url})
     # Si la imagen no existe, devuelve un JSON con el error
     return JSONResponse(status_code=404, content={"message": "Image not found"})
+
+
+@app.get(
+    "/get-images/{user_uid}",
+    tags=["Gestión de Imágenes"],
+    summary="Obtener todas las imágenes de un usuario",
+    description="Obtiene las URLs públicas de todas las imágenes almacenadas en Firebase Storage para un usuario.",
+)
+async def get_images(user_uid: str):
+    """Obtiene todas las imágenes de un usuario.
+
+    - **user_uid**: ID del usuario.
+    """
+    # Obtener blobs desde el bucket
+    blobs = bucket.list_blobs(prefix=f"users/{user_uid}/images/")
+
+    # Extraer URLs públicas de las imágenes
+    images = []
+    for blob in blobs:
+        print(f"Found blob: {blob.name}")  # Log para depuración
+        if blob.exists():
+            images.append(blob.public_url)
+
+    if images:
+        return JSONResponse(content={"images": images})
+
+    return JSONResponse(status_code=404, content={"message": "No images found for this user"})
 
 
 @app.delete(
