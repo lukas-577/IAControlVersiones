@@ -35,11 +35,13 @@ Esta API permite a los usuarios realizar las siguientes acciones:
 
 """
 
+server_url = os.getenv("CLOUD_RUN_SERVICE_URL", "http://localhost:8080")
 
 app = FastAPI(
     title="API de Gestión de Imágenes IA con Firebase Storage",
     description=description,
     version="1.0.0",
+    servers=[{"url": server_url}],
     contact={
         "name": "API IA con Firebase Storage",
         "email": "lmedinar@utem.cl",
