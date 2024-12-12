@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import os
 import uvicorn
+import numpy as np
 
 
 # Descripción general de la API
@@ -80,7 +81,7 @@ def read_root():
     "/upload-image/{user_uid}",
     tags=["Gestión de Imágenes"],
     summary="Subir imagen",
-    description="Sube una imagen, procesa la misma y la guarda en Firebase Storage. Genera una URL pública para la imagen procesada.",
+    description="Sube una imagen, procesa la misma y la guarda en Firebase Storage. Genera una URL pública para la imagen procesada y entrega los labels.",
 )
 # Asegúrate de recibir el UID del usuario
 async def upload_image(user_uid: str, file: UploadFile = File(...)):
@@ -106,7 +107,8 @@ async def upload_image(user_uid: str, file: UploadFile = File(...)):
     output_filename = f"{timestamp}_{file.filename}"
 
     # Llamar a la función plot_image_with_boxes para generar la imagen procesada en memoria
-    output_buffer = plot_image_with_boxes(tmp_buffer, prediction)
+    output_buffer, class_names_detected = plot_image_with_boxes(
+        tmp_buffer, prediction)
     output_buffer.seek(0)  # Reiniciar el puntero del buffer
 
     # Crear una referencia en Firebase Storage con el UID del usuario
@@ -125,7 +127,8 @@ async def upload_image(user_uid: str, file: UploadFile = File(...)):
     # Devuelve un JSON con el nombre de la imagen y la URL pública
     return JSONResponse(content={
         "message": "Image processed and uploaded successfully",
-        "image_path": image_url
+        "image_path": image_url,
+        "class_detected": class_names_detected
     })
 
 

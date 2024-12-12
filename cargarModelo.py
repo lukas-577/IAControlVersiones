@@ -67,6 +67,8 @@ def plot_image_with_boxes(image_path, prediction):
     scores = prediction[0]['scores'].cpu().numpy()
     labels = prediction[0]['labels'].cpu().numpy()
 
+    class_names_detected = []
+
     # Dibujar un rectángulo para cada caja detectada con puntuación mayor a un umbral
     for i, box in enumerate(boxes):
         if scores[i] > 0.2:  # Umbral de puntuación
@@ -76,6 +78,7 @@ def plot_image_with_boxes(image_path, prediction):
             ax.add_patch(rect)
             # Añadir el nombre de la clase
             class_name = class_names.get(labels[i], 'Desconocido')
+            class_names_detected.append(class_name)
             plt.text(x_min, y_min - 10, class_name, color='red',
                      fontsize=10, backgroundcolor="white")
 
@@ -85,4 +88,5 @@ def plot_image_with_boxes(image_path, prediction):
     buffer.seek(0)  # Reiniciar el puntero del buffer
     plt.close(fig)  # Cerrar la figura para liberar memoria
 
-    return buffer  # Retorna el buffer en lugar de guardar un archivo
+    # Retorna el buffer en lugar de guardar un archivo
+    return buffer, class_names_detected
